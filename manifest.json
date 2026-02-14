@@ -1,0 +1,48 @@
+{
+  "name": "Creador de Videos",
+  "short_name": "Video Creator",
+  "description": "Crea videos profesionales con imágenes y audio. Slideshow con efectos dinámicos y texto personalizable.",
+  "start_url": "/creador-video.html",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "photo", "video"],
+  "screenshots": [
+    {
+      "src": "screenshot.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva Imagen + Audio",
+      "short_name": "Imagen",
+      "description": "Crear video con imagen fija y múltiples audios",
+      "url": "/creador-video.html#single",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nuevo Slideshow",
+      "short_name": "Slideshow",
+      "description": "Crear slideshow con múltiples imágenes y música",
+      "url": "/creador-video.html#slideshow",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

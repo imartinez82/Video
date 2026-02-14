@@ -1,0 +1,2514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Video con Imagen y Audio</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Crea videos profesionales con imágenes y audio. Slideshow con efectos dinámicos y texto personalizable.">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Video Creator">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons for iOS -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .upload-section h2 {
+            color: #555;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .filename-input-wrapper {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .filename-input-wrapper label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .filename-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .filename-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .format-selector {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .format-selector label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .format-options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .format-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .format-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .format-option label {
+            display: block;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .format-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .format-option label:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .format-description {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .image-preview-item:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .image-preview-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .image-preview-item.drag-over {
+            border-color: #667eea;
+            border-style: dashed;
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview-item .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(245, 87, 108, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1;
+            z-index: 2;
+        }
+
+        .image-preview-item .remove-image:hover {
+            background: #f5576c;
+        }
+
+        .image-preview-item .image-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .audio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .audio-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .audio-info {
+            flex: 1;
+            font-size: 14px;
+            color: #666;
+            padding: 5px 0;
+        }
+
+        .create-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .create-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .create-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .chunk-progress {
+            text-align: center;
+            margin-top: 8px;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .duration-info {
+            text-align: center;
+            margin-top: 8px;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-radius: 8px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .duration-warning {
+            color: #f5576c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .processing-steps {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            color: #999;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .step-item.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .step-item.completed {
+            color: #38ef7d;
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .step-item.active .step-icon {
+            background: #667eea;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        .step-item.completed .step-icon {
+            background: #38ef7d;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .video-result {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .video-result video {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .download-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Creador de Video</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="single">Imagen + Audios</button>
+            <button class="tab" data-tab="slideshow">Slideshow + Música</button>
+        </div>
+
+        <!-- TAB 1: Imagen + Audios -->
+        <div class="tab-content active" id="tab-single">
+        
+        <div class="upload-section">
+            <h2><span class="icon">🖼️</span> Imagen de Fondo</h2>
+            <div class="file-input-wrapper">
+                <label for="imageInput" class="file-input-label">
+                    Seleccionar Imagen
+                </label>
+                <input type="file" id="imageInput" class="file-input" accept="image/*">
+                <div class="file-name" id="imageName">No se ha seleccionado ninguna imagen</div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h2><span class="icon">🎵</span> Audios (mínimo 1, máximo 5)</h2>
+            
+            <div class="audio-item">
+                <div class="audio-number">1</div>
+                <div class="file-input-wrapper" style="flex: 1;">
+                    <label for="audio1Input" class="file-input-label">
+                        Seleccionar Audio 1 (Requerido)
+                    </label>
+                    <input type="file" id="audio1Input" class="file-input" accept="audio/*">
+                </div>
+            </div>
+            <div class="audio-info" id="audio1Name">No seleccionado</div>
+
+            <div class="audio-item">
+                <div class="audio-number">2</div>
+                <div class="file-input-wrapper" style="flex: 1;">
+                    <label for="audio2Input" class="file-input-label">
+                        Seleccionar Audio 2 (Opcional)
+                    </label>
+                    <input type="file" id="audio2Input" class="file-input" accept="audio/*">
+                </div>
+            </div>
+            <div class="audio-info" id="audio2Name">Opcional - No seleccionado</div>
+
+            <div class="audio-item">
+                <div class="audio-number">3</div>
+                <div class="file-input-wrapper" style="flex: 1;">
+                    <label for="audio3Input" class="file-input-label">
+                        Seleccionar Audio 3 (Opcional)
+                    </label>
+                    <input type="file" id="audio3Input" class="file-input" accept="audio/*">
+                </div>
+            </div>
+            <div class="audio-info" id="audio3Name">Opcional - No seleccionado</div>
+
+            <div class="audio-item">
+                <div class="audio-number">4</div>
+                <div class="file-input-wrapper" style="flex: 1;">
+                    <label for="audio4Input" class="file-input-label">
+                        Seleccionar Audio 4 (Opcional)
+                    </label>
+                    <input type="file" id="audio4Input" class="file-input" accept="audio/*">
+                </div>
+            </div>
+            <div class="audio-info" id="audio4Name">Opcional - No seleccionado</div>
+
+            <div class="audio-item">
+                <div class="audio-number">5</div>
+                <div class="file-input-wrapper" style="flex: 1;">
+                    <label for="audio5Input" class="file-input-label">
+                        Seleccionar Audio 5 (Opcional)
+                    </label>
+                    <input type="file" id="audio5Input" class="file-input" accept="audio/*">
+                </div>
+            </div>
+            <div class="audio-info" id="audio5Name">Opcional - No seleccionado</div>
+        </div>
+
+        <div class="filename-input-wrapper">
+            <label for="filenameInput">📝 Nombre del archivo (opcional)</label>
+            <input 
+                type="text" 
+                id="filenameInput" 
+                class="filename-input" 
+                placeholder="mi-video"
+                maxlength="50"
+            >
+        </div>
+
+        <div class="format-selector">
+            <label>🎬 Formato de salida</label>
+            <div class="format-options">
+                <div class="format-option">
+                    <input type="radio" id="formatWebm" name="format" value="webm">
+                    <label for="formatWebm">
+                        <div>WebM</div>
+                        <div class="format-description">Mejor calidad, menor tamaño</div>
+                    </label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="formatMp4" name="format" value="mp4" checked>
+                    <label for="formatMp4">
+                        <div>MP4</div>
+                        <div class="format-description">Mayor compatibilidad</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="create-button" id="createButton" disabled>
+            Crear Video
+        </button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Procesando...</div>
+            <div class="chunk-progress" id="chunkProgress"></div>
+            <div class="duration-info" id="durationInfo" style="display: none;"></div>
+            <div class="processing-steps" id="processingSteps">
+                <div class="step-item" id="step1">
+                    <div class="step-icon">1</div>
+                    <span>Cargando imagen</span>
+                </div>
+                <div class="step-item" id="step2">
+                    <div class="step-icon">2</div>
+                    <span>Procesando audios</span>
+                </div>
+                <div class="step-item" id="step3">
+                    <div class="step-icon">3</div>
+                    <span>Combinando audios</span>
+                </div>
+                <div class="step-item" id="step4">
+                    <div class="step-icon">4</div>
+                    <span>Generando video</span>
+                </div>
+                <div class="step-item" id="step5">
+                    <div class="step-icon">5</div>
+                    <span>Finalizando</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-result" id="videoResult">
+            <video id="resultVideo" controls></video>
+            <button class="download-button" id="downloadButton">
+                ⬇️ Descargar Video
+            </button>
+        </div>
+        
+        </div>
+        <!-- END TAB 1 -->
+
+        <!-- TAB 2: Slideshow + Música -->
+        <div class="tab-content" id="tab-slideshow">
+        
+        <div class="upload-section">
+            <h2><span class="icon">🖼️</span> Imágenes para el Slideshow</h2>
+            <div class="file-input-wrapper">
+                <label for="imagesInput" class="file-input-label">
+                    Seleccionar Imágenes (mínimo 1)
+                </label>
+                <input type="file" id="imagesInput" class="file-input" accept="image/*" multiple>
+                <div class="file-name" id="imagesName">No se han seleccionado imágenes</div>
+            </div>
+            <div class="images-grid" id="imagesGrid"></div>
+        </div>
+
+        <div class="upload-section">
+            <h2><span class="icon">🎵</span> Música de Fondo</h2>
+            <div class="audio-item">
+                <div class="audio-number">♪</div>
+                <div class="file-input-wrapper" style="flex: 1;">
+                    <label for="musicInput" class="file-input-label">
+                        Seleccionar Música
+                    </label>
+                    <input type="file" id="musicInput" class="file-input" accept="audio/*">
+                </div>
+            </div>
+            <div class="audio-info" id="musicName">No seleccionado</div>
+        </div>
+
+        <div class="upload-section">
+            <h2><span class="icon">⚙️</span> Configuración del Slideshow</h2>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        Fade In (segundos)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="fadeInDuration" 
+                        class="filename-input" 
+                        value="0.5"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                    >
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        Fade Out (segundos)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="fadeOutDuration" 
+                        class="filename-input" 
+                        value="2"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                    >
+                </div>
+            </div>
+            
+            <div>
+                <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                    ⏱️ Duración de cada imagen (segundos)
+                </label>
+                <input 
+                    type="number" 
+                    id="slideDuration" 
+                    class="filename-input" 
+                    value="4"
+                    min="1"
+                    max="60"
+                    step="0.5"
+                >
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                    🎬 Duración máxima del video (segundos)
+                </label>
+                <input 
+                    type="number" 
+                    id="maxVideoDuration" 
+                    class="filename-input" 
+                    placeholder="Automático (duración de la canción)"
+                    min="10"
+                    max="1200"
+                    step="1"
+                >
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">
+                    Dejar vacío para usar toda la canción. Si se especifica, el video tendrá fade out de imagen y sonido al llegar a este tiempo (máx. 20 min = 1200 seg)
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h2><span class="icon">📝</span> Texto Superpuesto (Opcional)</h2>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                    Texto
+                </label>
+                <input 
+                    type="text" 
+                    id="overlayText" 
+                    class="filename-input" 
+                    placeholder="Escribe el texto que aparecerá en el video"
+                    maxlength="100"
+                >
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        Tamaño de fuente (px)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="textSize" 
+                        class="filename-input" 
+                        value="60"
+                        min="10"
+                        max="100"
+                        step="1"
+                    >
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        Fuente
+                    </label>
+                    <select id="textFont" class="filename-input" style="cursor: pointer;">
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Comic Sans MS" selected>Comic Sans MS</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Arial Black">Arial Black</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 20px; margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="textBold" style="cursor: pointer; width: 18px; height: 18px;">
+                    <span style="font-weight: 600; color: #555;">Negrita</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="textItalic" style="cursor: pointer; width: 18px; height: 18px;">
+                    <span style="font-style: italic; color: #555;">Cursiva</span>
+                </label>
+            </div>
+            
+            <div style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        Color del texto
+                    </label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input 
+                            type="color" 
+                            id="textColor" 
+                            class="filename-input" 
+                            value="#ffffff"
+                            style="height: 45px; cursor: pointer; flex: 1;"
+                        >
+                        <select id="textColorPreset" class="filename-input" style="cursor: pointer; flex: 2;">
+                            <option value="">Colores rápidos</option>
+                            <optgroup label="Básicos">
+                                <option value="#ffffff">⚪ Blanco</option>
+                                <option value="#000000">⚫ Negro</option>
+                                <option value="#ff0000">🔴 Rojo</option>
+                                <option value="#00ff00">🟢 Verde Lima</option>
+                                <option value="#0000ff">🔵 Azul</option>
+                                <option value="#ffff00">🟡 Amarillo</option>
+                            </optgroup>
+                            <optgroup label="Vivos">
+                                <option value="#ff00ff">💜 Magenta</option>
+                                <option value="#00ffff">🔷 Cian</option>
+                                <option value="#ffa500">🟠 Naranja</option>
+                                <option value="#ff1493">💗 Rosa Intenso</option>
+                                <option value="#00ff7f">💚 Verde Primavera</option>
+                                <option value="#ff69b4">🌺 Rosa Cálido</option>
+                            </optgroup>
+                            <optgroup label="Pasteles">
+                                <option value="#ffb6c1">🌸 Rosa Pastel</option>
+                                <option value="#add8e6">🔵 Azul Claro</option>
+                                <option value="#90ee90">🍃 Verde Claro</option>
+                                <option value="#ffe4b5">🌾 Melocotón</option>
+                                <option value="#e6e6fa">💜 Lavanda</option>
+                                <option value="#f0e68c">🌻 Amarillo Suave</option>
+                            </optgroup>
+                            <optgroup label="Oscuros">
+                                <option value="#8b0000">🍷 Rojo Oscuro</option>
+                                <option value="#006400">🌲 Verde Oscuro</option>
+                                <option value="#00008b">🌊 Azul Oscuro</option>
+                                <option value="#8b008b">🍇 Magenta Oscuro</option>
+                                <option value="#a52a2a">🟤 Marrón</option>
+                                <option value="#2f4f4f">🏔️ Gris Pizarra</option>
+                            </optgroup>
+                            <optgroup label="Metálicos">
+                                <option value="#ffd700">🌟 Dorado</option>
+                                <option value="#c0c0c0">⚪ Plateado</option>
+                                <option value="#cd7f32">🥉 Bronce</option>
+                                <option value="#b87333">🟫 Cobre</option>
+                            </optgroup>
+                            <optgroup label="Tonos Tierra">
+                                <option value="#8b4513">🏜️ Marrón Arena</option>
+                                <option value="#d2691e">🍂 Chocolate</option>
+                                <option value="#daa520">🍯 Dorado Oscuro</option>
+                                <option value="#bc8f8f">🏜️ Marrón Rosado</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        Padding (px)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="textPadding" 
+                        class="filename-input" 
+                        value="50"
+                        min="0"
+                        max="100"
+                        step="5"
+                    >
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                <h3 style="color: #555; font-size: 15px; margin-bottom: 15px; font-weight: 600;">Borde del texto</h3>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                            Ancho del borde (px)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="textStrokeWidth" 
+                            class="filename-input" 
+                            value="1"
+                            min="0"
+                            max="20"
+                            step="0.5"
+                        >
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #555; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                            Color del borde
+                        </label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input 
+                                type="color" 
+                                id="textStrokeColor" 
+                                class="filename-input" 
+                                value="#ffffff"
+                                style="height: 45px; cursor: pointer; flex: 1;"
+                            >
+                            <select id="textStrokeColorPreset" class="filename-input" style="cursor: pointer; flex: 2;">
+                                <option value="">Colores rápidos</option>
+                                <optgroup label="Básicos">
+                                    <option value="#ffffff">⚪ Blanco</option>
+                                    <option value="#000000">⚫ Negro</option>
+                                    <option value="#ff0000">🔴 Rojo</option>
+                                    <option value="#00ff00">🟢 Verde Lima</option>
+                                    <option value="#0000ff">🔵 Azul</option>
+                                    <option value="#ffff00">🟡 Amarillo</option>
+                                </optgroup>
+                                <optgroup label="Vivos">
+                                    <option value="#ff00ff">💜 Magenta</option>
+                                    <option value="#00ffff">🔷 Cian</option>
+                                    <option value="#ffa500">🟠 Naranja</option>
+                                    <option value="#ff1493">💗 Rosa Intenso</option>
+                                    <option value="#00ff7f">💚 Verde Primavera</option>
+                                    <option value="#ff69b4">🌺 Rosa Cálido</option>
+                                </optgroup>
+                                <optgroup label="Pasteles">
+                                    <option value="#ffb6c1">🌸 Rosa Pastel</option>
+                                    <option value="#add8e6">🔵 Azul Claro</option>
+                                    <option value="#90ee90">🍃 Verde Claro</option>
+                                    <option value="#ffe4b5">🌾 Melocotón</option>
+                                    <option value="#e6e6fa">💜 Lavanda</option>
+                                    <option value="#f0e68c">🌻 Amarillo Suave</option>
+                                </optgroup>
+                                <optgroup label="Oscuros">
+                                    <option value="#8b0000">🍷 Rojo Oscuro</option>
+                                    <option value="#006400">🌲 Verde Oscuro</option>
+                                    <option value="#00008b">🌊 Azul Oscuro</option>
+                                    <option value="#8b008b">🍇 Magenta Oscuro</option>
+                                    <option value="#a52a2a">🟤 Marrón</option>
+                                    <option value="#2f4f4f">🏔️ Gris Pizarra</option>
+                                </optgroup>
+                                <optgroup label="Metálicos">
+                                    <option value="#ffd700">🌟 Dorado</option>
+                                    <option value="#c0c0c0">⚪ Plateado</option>
+                                    <option value="#cd7f32">🥉 Bronce</option>
+                                    <option value="#b87333">🟫 Cobre</option>
+                                </optgroup>
+                                <optgroup label="Tonos Tierra">
+                                    <option value="#8b4513">🏜️ Marrón Arena</option>
+                                    <option value="#d2691e">🍂 Chocolate</option>
+                                    <option value="#daa520">🍯 Dorado Oscuro</option>
+                                    <option value="#bc8f8f">🏜️ Marrón Rosado</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filename-input-wrapper">
+            <label for="filenameSlideshowInput">📝 Nombre del archivo (opcional)</label>
+            <input 
+                type="text" 
+                id="filenameSlideshowInput" 
+                class="filename-input" 
+                placeholder="mi-slideshow"
+                maxlength="50"
+            >
+        </div>
+
+        <div class="format-selector">
+            <label>🎬 Formato de salida</label>
+            <div class="format-options">
+                <div class="format-option">
+                    <input type="radio" id="formatSlideshowWebm" name="formatSlideshow" value="webm">
+                    <label for="formatSlideshowWebm">
+                        <div>WebM</div>
+                        <div class="format-description">Mejor calidad, menor tamaño</div>
+                    </label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="formatSlideshowMp4" name="formatSlideshow" value="mp4" checked>
+                    <label for="formatSlideshowMp4">
+                        <div>MP4</div>
+                        <div class="format-description">Mayor compatibilidad</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="create-button" id="createSlideshowButton" disabled>
+            Crear Slideshow
+        </button>
+
+        <button class="download-button" id="savePreferencesButton" style="margin-top: 15px;">
+            💾 Guardar Preferencias
+        </button>
+        
+        </div>
+        <!-- END TAB 2 -->
+    </div>
+
+    <script>
+        let imageFile = null;
+        let audioFiles = [null, null, null, null, null];
+        let videoBlob = null;
+        
+        // Variables para slideshow
+        let slideshowImages = [];
+        let musicFile = null;
+
+        const imageInput = document.getElementById('imageInput');
+        const imageName = document.getElementById('imageName');
+        const audio1Input = document.getElementById('audio1Input');
+        const audio2Input = document.getElementById('audio2Input');
+        const audio3Input = document.getElementById('audio3Input');
+        const audio4Input = document.getElementById('audio4Input');
+        const audio5Input = document.getElementById('audio5Input');
+        const filenameInput = document.getElementById('filenameInput');
+        const createButton = document.getElementById('createButton');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const chunkProgress = document.getElementById('chunkProgress');
+        const durationInfo = document.getElementById('durationInfo');
+        const videoResult = document.getElementById('videoResult');
+        const resultVideo = document.getElementById('resultVideo');
+        const downloadButton = document.getElementById('downloadButton');
+        
+        // Elementos del slideshow
+        const imagesInput = document.getElementById('imagesInput');
+        const imagesName = document.getElementById('imagesName');
+        const imagesGrid = document.getElementById('imagesGrid');
+        const musicInput = document.getElementById('musicInput');
+        const musicName = document.getElementById('musicName');
+        const filenameSlideshowInput = document.getElementById('filenameSlideshowInput');
+        const createSlideshowButton = document.getElementById('createSlideshowButton');
+        const fadeInDurationInput = document.getElementById('fadeInDuration');
+        const fadeOutDurationInput = document.getElementById('fadeOutDuration');
+        const slideDurationInput = document.getElementById('slideDuration');
+        const maxVideoDurationInput = document.getElementById('maxVideoDuration');
+        const overlayTextInput = document.getElementById('overlayText');
+        const textSizeInput = document.getElementById('textSize');
+        const textFontInput = document.getElementById('textFont');
+        const textColorInput = document.getElementById('textColor');
+        const textColorPresetInput = document.getElementById('textColorPreset');
+        const textPaddingInput = document.getElementById('textPadding');
+        const textStrokeWidthInput = document.getElementById('textStrokeWidth');
+        const textStrokeColorInput = document.getElementById('textStrokeColor');
+        const textStrokeColorPresetInput = document.getElementById('textStrokeColorPreset');
+        const textBoldCheckbox = document.getElementById('textBold');
+        const textItalicCheckbox = document.getElementById('textItalic');
+        const savePreferencesButton = document.getElementById('savePreferencesButton');
+
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                document.getElementById(`tab-${tabName}`).classList.add('active');
+            });
+        });
+
+        // Actualizar color picker cuando se selecciona un preset de color
+        textColorPresetInput.addEventListener('change', function() {
+            if (this.value) {
+                textColorInput.value = this.value;
+            }
+        });
+
+        // Actualizar color picker del borde cuando se selecciona un preset
+        textStrokeColorPresetInput.addEventListener('change', function() {
+            if (this.value) {
+                textStrokeColorInput.value = this.value;
+            }
+        });
+
+        // Guardar preferencias
+        savePreferencesButton.addEventListener('click', function() {
+            const preferences = {
+                // Configuración de slideshow
+                fadeInDuration: fadeInDurationInput.value,
+                fadeOutDuration: fadeOutDurationInput.value,
+                slideDuration: slideDurationInput.value,
+                maxVideoDuration: maxVideoDurationInput.value,
+                
+                // Configuración de texto
+                overlayText: overlayTextInput.value,
+                textSize: textSizeInput.value,
+                textFont: textFontInput.value,
+                textColor: textColorInput.value,
+                textPadding: textPaddingInput.value,
+                textStrokeWidth: textStrokeWidthInput.value,
+                textStrokeColor: textStrokeColorInput.value,
+                textBold: textBoldCheckbox.checked,
+                textItalic: textItalicCheckbox.checked,
+                
+                // Formato
+                formatSlideshow: document.querySelector('input[name="formatSlideshow"]:checked').value
+            };
+            
+            localStorage.setItem('slideshowPreferences', JSON.stringify(preferences));
+            
+            // Mostrar confirmación
+            const originalText = this.textContent;
+            this.textContent = '✅ Preferencias Guardadas';
+            this.style.background = 'linear-gradient(135deg, #38ef7d 0%, #11998e 100%)';
+            
+            setTimeout(() => {
+                this.textContent = originalText;
+                this.style.background = '';
+            }, 2000);
+        });
+
+        // Cargar preferencias al iniciar
+        function loadPreferences() {
+            const saved = localStorage.getItem('slideshowPreferences');
+            if (saved) {
+                try {
+                    const preferences = JSON.parse(saved);
+                    
+                    // Aplicar configuración de slideshow
+                    if (preferences.fadeInDuration) fadeInDurationInput.value = preferences.fadeInDuration;
+                    if (preferences.fadeOutDuration) fadeOutDurationInput.value = preferences.fadeOutDuration;
+                    if (preferences.slideDuration) slideDurationInput.value = preferences.slideDuration;
+                    if (preferences.maxVideoDuration) maxVideoDurationInput.value = preferences.maxVideoDuration;
+                    
+                    // Aplicar configuración de texto
+                    if (preferences.overlayText) overlayTextInput.value = preferences.overlayText;
+                    if (preferences.textSize) textSizeInput.value = preferences.textSize;
+                    if (preferences.textFont) textFontInput.value = preferences.textFont;
+                    if (preferences.textColor) textColorInput.value = preferences.textColor;
+                    if (preferences.textPadding) textPaddingInput.value = preferences.textPadding;
+                    if (preferences.textStrokeWidth) textStrokeWidthInput.value = preferences.textStrokeWidth;
+                    if (preferences.textStrokeColor) textStrokeColorInput.value = preferences.textStrokeColor;
+                    if (preferences.textBold !== undefined) textBoldCheckbox.checked = preferences.textBold;
+                    if (preferences.textItalic !== undefined) textItalicCheckbox.checked = preferences.textItalic;
+                    
+                    // Aplicar formato
+                    if (preferences.formatSlideshow) {
+                        const formatRadio = document.querySelector(`input[name="formatSlideshow"][value="${preferences.formatSlideshow}"]`);
+                        if (formatRadio) formatRadio.checked = true;
+                    }
+                    
+                    console.log('Preferencias cargadas exitosamente');
+                } catch (e) {
+                    console.error('Error al cargar preferencias:', e);
+                }
+            }
+        }
+
+        // Cargar preferencias al inicio
+        loadPreferences();
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                imageFile = file;
+                imageName.textContent = file.name;
+                checkAllFilesSelected();
+            }
+        });
+
+        audio1Input.addEventListener('change', (e) => handleAudioInput(e, 0, 'audio1Name'));
+        audio2Input.addEventListener('change', (e) => handleAudioInput(e, 1, 'audio2Name'));
+        audio3Input.addEventListener('change', (e) => handleAudioInput(e, 2, 'audio3Name'));
+        audio4Input.addEventListener('change', (e) => handleAudioInput(e, 3, 'audio4Name'));
+        audio5Input.addEventListener('change', (e) => handleAudioInput(e, 4, 'audio5Name'));
+        
+        // Color preset selector
+        textColorPresetInput.addEventListener('change', (e) => {
+            if (e.target.value) {
+                textColorInput.value = e.target.value;
+                // Reset the selector back to default
+                setTimeout(() => {
+                    textColorPresetInput.value = '';
+                }, 100);
+            }
+        });
+
+        function handleAudioInput(e, index, nameId) {
+            const file = e.target.files[0];
+            if (file) {
+                audioFiles[index] = file;
+                document.getElementById(nameId).textContent = file.name;
+                checkAllFilesSelected();
+            }
+        }
+
+        function checkAllFilesSelected() {
+            const allSelected = imageFile && audioFiles[0] !== null;
+            createButton.disabled = !allSelected;
+        }
+
+        createButton.addEventListener('click', createVideo);
+        downloadButton.addEventListener('click', downloadVideo);
+        
+        // Slideshow event listeners
+        imagesInput.addEventListener('change', handleImagesInput);
+        musicInput.addEventListener('change', handleMusicInput);
+        createSlideshowButton.addEventListener('click', createSlideshow);
+        
+        function handleImagesInput(e) {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                // Detectar duplicados considerando las imágenes ya existentes
+                const existingFiles = new Set();
+                
+                // Añadir las imágenes ya existentes al set
+                slideshowImages.forEach(file => {
+                    const fileKey = `${file.name}-${file.size}`;
+                    existingFiles.add(fileKey);
+                });
+                
+                // Filtrar nuevas imágenes únicas
+                const newUniqueFiles = [];
+                let duplicatesCount = 0;
+                
+                files.forEach(file => {
+                    const fileKey = `${file.name}-${file.size}`;
+                    if (!existingFiles.has(fileKey)) {
+                        existingFiles.add(fileKey);
+                        newUniqueFiles.push(file);
+                    } else {
+                        duplicatesCount++;
+                    }
+                });
+                
+                // Añadir las nuevas imágenes a las existentes
+                slideshowImages = [...slideshowImages, ...newUniqueFiles];
+                
+                // Actualizar mensaje
+                let message = `${slideshowImages.length} imagen(es) seleccionada(s)`;
+                if (duplicatesCount > 0) {
+                    message += ` (${duplicatesCount} duplicado(s) ignorado(s))`;
+                }
+                if (newUniqueFiles.length > 0) {
+                    message += ` - ${newUniqueFiles.length} nueva(s) añadida(s)`;
+                }
+                imagesName.textContent = message;
+                
+                // Actualizar grid con TODAS las imágenes
+                imagesGrid.innerHTML = '';
+                slideshowImages.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const div = document.createElement('div');
+                        div.className = 'image-preview-item';
+                        div.draggable = true;
+                        div.dataset.index = index;
+                        div.innerHTML = `
+                            <div class="image-number">${index + 1}</div>
+                            <img src="${e.target.result}">
+                            <button class="remove-image" onclick="removeImage(${index})">×</button>
+                        `;
+                        
+                        // Eventos de drag and drop
+                        div.addEventListener('dragstart', handleDragStart);
+                        div.addEventListener('dragover', handleDragOver);
+                        div.addEventListener('drop', handleDrop);
+                        div.addEventListener('dragend', handleDragEnd);
+                        
+                        imagesGrid.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                
+                checkSlideshowFilesSelected();
+            }
+        }
+        
+        // Variables para drag and drop
+        let draggedElement = null;
+        let draggedIndex = null;
+        
+        function handleDragStart(e) {
+            draggedElement = this;
+            draggedIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+            return false;
+        }
+        
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            this.classList.remove('drag-over');
+            
+            if (draggedElement !== this) {
+                const dropIndex = parseInt(this.dataset.index);
+                
+                // Reordenar array
+                const draggedFile = slideshowImages[draggedIndex];
+                slideshowImages.splice(draggedIndex, 1);
+                slideshowImages.splice(dropIndex, 0, draggedFile);
+                
+                // Actualizar vista
+                updateImageGrid();
+            }
+            
+            return false;
+        }
+        
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            
+            // Limpiar clases de todos los items
+            document.querySelectorAll('.image-preview-item').forEach(item => {
+                item.classList.remove('drag-over', 'dragging');
+            });
+        }
+        
+        function updateImageGrid() {
+            imagesGrid.innerHTML = '';
+            slideshowImages.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.draggable = true;
+                    div.dataset.index = index;
+                    div.innerHTML = `
+                        <div class="image-number">${index + 1}</div>
+                        <img src="${e.target.result}">
+                        <button class="remove-image" onclick="removeImage(${index})">×</button>
+                    `;
+                    
+                    div.addEventListener('dragstart', handleDragStart);
+                    div.addEventListener('dragover', handleDragOver);
+                    div.addEventListener('drop', handleDrop);
+                    div.addEventListener('dragend', handleDragEnd);
+                    
+                    imagesGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function removeImage(index) {
+            slideshowImages.splice(index, 1);
+            imagesInput.value = '';
+            
+            if (slideshowImages.length > 0) {
+                imagesName.textContent = `${slideshowImages.length} imagen(es) seleccionada(s)`;
+                updateImageGrid();
+            } else {
+                imagesName.textContent = 'No se han seleccionado imágenes';
+                imagesGrid.innerHTML = '';
+            }
+            
+            checkSlideshowFilesSelected();
+        }
+        
+        function handleMusicInput(e) {
+            const file = e.target.files[0];
+            if (file) {
+                musicFile = file;
+                musicName.textContent = file.name;
+                checkSlideshowFilesSelected();
+            }
+        }
+        
+        function checkSlideshowFilesSelected() {
+            const allSelected = slideshowImages.length > 0 && musicFile !== null;
+            createSlideshowButton.disabled = !allSelected;
+        }
+
+        async function createVideo() {
+            createButton.disabled = true;
+            progressContainer.style.display = 'block';
+            videoResult.style.display = 'none';
+            
+            // Resetear todos los pasos
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active', 'completed');
+            }
+            
+            try {
+                // Paso 1: Cargar imagen
+                setStep(1, 'active');
+                progressText.textContent = 'Cargando imagen...';
+                progressFill.style.width = '15%';
+
+                const img = await loadImage(imageFile);
+                const canvas = document.createElement('canvas');
+                canvas.width = 1280;
+                canvas.height = 720;
+                const ctx = canvas.getContext('2d');
+
+                // Fondo negro
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Dibujar imagen SIN recortar (contain, no cover)
+                const imgRatio = img.width / img.height;
+                const canvasRatio = canvas.width / canvas.height;
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
+                if (imgRatio > canvasRatio) {
+                    // Imagen más ancha que el canvas
+                    drawWidth = canvas.width;
+                    drawHeight = canvas.width / imgRatio;
+                    drawX = 0;
+                    drawY = (canvas.height - drawHeight) / 2;
+                } else {
+                    // Imagen más alta que el canvas
+                    drawHeight = canvas.height;
+                    drawWidth = canvas.height * imgRatio;
+                    drawX = (canvas.width - drawWidth) / 2;
+                    drawY = 0;
+                }
+                
+                ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+                setStep(1, 'completed');
+                
+                // Paso 2: Procesando audios
+                setStep(2, 'active');
+                progressText.textContent = 'Procesando audios...';
+                progressFill.style.width = '30%';
+
+                // Filtrar solo los audios seleccionados
+                const selectedAudios = audioFiles.filter(f => f !== null);
+                console.log(`Procesando ${selectedAudios.length} audio(s)`);
+                
+                // Crear AudioContext con máxima calidad (48kHz es el máximo estándar)
+                const audioContext = new AudioContext({ 
+                    sampleRate: 48000,  // 48 kHz - calidad profesional
+                    latencyHint: 'playback' // Optimizado para calidad de reproducción
+                });
+                
+                console.log('AudioContext creado:', {
+                    sampleRate: audioContext.sampleRate + ' Hz',
+                    state: audioContext.state,
+                    baseLatency: audioContext.baseLatency
+                });
+                
+                const buffers = await Promise.all(
+                    selectedAudios.map(file => loadAudioBuffer(file, audioContext))
+                );
+
+                setStep(2, 'completed');
+
+                // Paso 3: Combinando audios
+                setStep(3, 'active');
+                progressText.textContent = `Combinando ${selectedAudios.length} audio(s)...`;
+                progressFill.style.width = '50%';
+
+                // Calcular duración total
+                const totalDuration = buffers.reduce((sum, buffer) => sum + buffer.duration, 0);
+                const MAX_DURATION = 20 * 60; // 20 minutos en segundos
+                const willBeTruncated = totalDuration > MAX_DURATION;
+                const finalDuration = Math.min(totalDuration, MAX_DURATION);
+                
+                // Fade in siempre 1 segundo, fade out depende si se trunca
+                const fadeInSeconds = 1;
+                const fadeOutSeconds = willBeTruncated ? 3 : 1; // 3 segundos si se trunca, 1 si no
+                
+                // Mostrar información de duración
+                durationInfo.style.display = 'block';
+                const minutes = Math.floor(finalDuration / 60);
+                const seconds = Math.floor(finalDuration % 60);
+                durationInfo.innerHTML = `⏱️ Duración del video: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (willBeTruncated) {
+                    const origMinutes = Math.floor(totalDuration / 60);
+                    const origSeconds = Math.floor(totalDuration % 60);
+                    durationInfo.innerHTML += `<div class="duration-warning">⚠️ Audio original: ${origMinutes}:${origSeconds.toString().padStart(2, '0')} - Se recortará a 20 min con fade out de 3 segundos</div>`;
+                }
+                
+                console.log(`Duración total: ${totalDuration}s, Final: ${finalDuration}s, Truncado: ${willBeTruncated}, Fade out: ${fadeOutSeconds}s`);
+
+                // Crear buffer combinado con fade in/out y límite de 20 minutos
+                const sampleRate = audioContext.sampleRate;
+                const fadeInSamples = sampleRate * fadeInSeconds;
+                const fadeOutSamples = sampleRate * fadeOutSeconds;
+                const maxSamples = Math.ceil(sampleRate * finalDuration);
+                const combinedBuffer = audioContext.createBuffer(2, maxSamples, sampleRate);
+
+                let sampleOffset = 0;
+                for (let i = 0; i < buffers.length; i++) {
+                    const buffer = buffers[i];
+                    const bufferLength = Math.min(buffer.length, maxSamples - sampleOffset);
+                    
+                    if (bufferLength <= 0) break; // Ya llegamos al límite
+                    
+                    for (let channel = 0; channel < 2; channel++) {
+                        const outputData = combinedBuffer.getChannelData(channel);
+                        const sourceChannel = Math.min(channel, buffer.numberOfChannels - 1);
+                        const channelData = buffer.getChannelData(sourceChannel);
+                        
+                        for (let j = 0; j < bufferLength; j++) {
+                            const absoluteSample = sampleOffset + j;
+                            let sample = channelData[j];
+                            
+                            // Fade in al inicio (primer segundo)
+                            if (absoluteSample < fadeInSamples) {
+                                const fadeInGain = absoluteSample / fadeInSamples;
+                                sample *= fadeInGain;
+                            }
+                            
+                            // Fade out al final (último segundo)
+                            if (absoluteSample >= maxSamples - fadeOutSamples) {
+                                const fadeOutGain = (maxSamples - absoluteSample) / fadeOutSamples;
+                                sample *= fadeOutGain;
+                            }
+                            
+                            if (absoluteSample < maxSamples) {
+                                outputData[absoluteSample] = sample;
+                            }
+                        }
+                    }
+                    sampleOffset += bufferLength;
+                    
+                    if (sampleOffset >= maxSamples) break; // Límite alcanzado
+                }
+
+                setStep(3, 'completed');
+
+                // Paso 4: Generando video
+                setStep(4, 'active');
+                progressText.textContent = 'Generando video...';
+                progressFill.style.width = '70%';
+
+                // Configurar animación de fade in/out en el canvas
+                const fadeInDuration = fadeInSeconds * 1000;
+                const fadeOutDuration = fadeOutSeconds * 1000;
+                const fadeOutStartTime = (finalDuration - fadeOutSeconds) * 1000;
+                let animationStartTime = null;
+                
+                function animateFade(timestamp) {
+                    if (!animationStartTime) animationStartTime = timestamp;
+                    const elapsed = timestamp - animationStartTime;
+                    
+                    // Redibujar con opacidad
+                    ctx.save();
+                    
+                    // Fade in (primer segundo)
+                    if (elapsed < fadeInDuration) {
+                        const opacity = elapsed / fadeInDuration;
+                        ctx.globalAlpha = opacity;
+                    }
+                    // Fade out (últimos segundos)
+                    else if (elapsed >= fadeOutStartTime) {
+                        const fadeProgress = (elapsed - fadeOutStartTime) / fadeOutDuration;
+                        const opacity = Math.max(0, 1 - fadeProgress);
+                        ctx.globalAlpha = opacity;
+                    }
+                    else {
+                        ctx.globalAlpha = 1;
+                    }
+                    
+                    // Limpiar y redibujar con fondo negro y modo contain
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                    
+                    ctx.restore();
+                    
+                    // Continuar animación si no hemos terminado
+                    if (elapsed < finalDuration * 1000) {
+                        requestAnimationFrame(animateFade);
+                    }
+                }
+                
+                // Iniciar animación de fade
+                requestAnimationFrame(animateFade);
+
+                // Crear stream de video
+                const canvasStream = canvas.captureStream(25);
+
+                // CRÍTICO: Crear un MediaStream desde el buffer de audio usando AudioContext
+                // Necesitamos crear un source que se pueda conectar a un MediaStreamDestination
+                const audioStreamContext = new AudioContext({ 
+                    sampleRate: 48000,  // Mismo sample rate que el procesamiento
+                    latencyHint: 'playback'
+                });
+                const audioStreamSource = audioStreamContext.createBufferSource();
+                audioStreamSource.buffer = combinedBuffer;
+                
+                const audioStreamDestination = audioStreamContext.createMediaStreamDestination();
+                audioStreamSource.connect(audioStreamDestination);
+
+                // Combinar streams
+                const videoTrack = canvasStream.getVideoTracks()[0];
+                const audioTrack = audioStreamDestination.stream.getAudioTracks()[0];
+                
+                console.log('Video track:', videoTrack);
+                console.log('Audio track:', audioTrack);
+                
+                const combinedStream = new MediaStream([videoTrack, audioTrack]);
+
+                // Obtener formato seleccionado
+                const selectedFormat = document.querySelector('input[name="format"]:checked').value;
+                
+                // Determinar el mejor codec disponible según el formato seleccionado
+                let possibleTypes = [];
+                let fileExtension = '';
+                
+                if (selectedFormat === 'mp4') {
+                    possibleTypes = [
+                        'video/mp4;codecs=avc1,mp4a.40.2',
+                        'video/mp4;codecs=h264,aac',
+                        'video/mp4'
+                    ];
+                    fileExtension = 'mp4';
+                } else {
+                    possibleTypes = [
+                        'video/webm;codecs=vp9,opus',
+                        'video/webm;codecs=vp8,opus',
+                        'video/webm;codecs=h264,opus',
+                        'video/webm'
+                    ];
+                    fileExtension = 'webm';
+                }
+                
+                let selectedType = possibleTypes[possibleTypes.length - 1]; // Fallback al último
+                for (const type of possibleTypes) {
+                    if (MediaRecorder.isTypeSupported(type)) {
+                        selectedType = type;
+                        console.log('Usando codec:', type);
+                        break;
+                    }
+                }
+                
+                // Si no se soporta MP4, avisar y usar WebM
+                if (selectedFormat === 'mp4' && !selectedType.includes('mp4')) {
+                    console.warn('MP4 no soportado, usando WebM');
+                    selectedType = 'video/webm;codecs=vp8,opus';
+                    fileExtension = 'webm';
+                    alert('Tu navegador no soporta grabación en MP4. Se usará formato WebM.');
+                }
+
+                const mediaRecorder = new MediaRecorder(combinedStream, {
+                    mimeType: selectedType,
+                    videoBitsPerSecond: 5000000, // 5 Mbps para video de alta calidad
+                    audioBitsPerSecond: 320000   // 320 kbps - calidad máxima para audio (equivalente a MP3 320kbps)
+                });
+                
+                console.log('MediaRecorder configurado:', {
+                    mimeType: selectedType,
+                    format: fileExtension.toUpperCase(),
+                    videoBitrate: '5 Mbps',
+                    audioBitrate: '320 kbps (máxima calidad)',
+                    sampleRate: audioStreamContext.sampleRate + ' Hz'
+                });
+
+                const chunks = [];
+                let recordingStartTime = Date.now();
+                
+                // Variables para tracking de progreso
+                const recordingDuration = (finalDuration + 1) * 1000;
+                const estimatedChunks = Math.ceil(recordingDuration / 1000); // Estimación más realista
+                let chunkUpdateInterval;
+                let requestDataInterval;
+                
+                // Actualizar progreso de chunks cada 3 segundos
+                chunkUpdateInterval = setInterval(() => {
+                    const elapsedTime = Date.now() - recordingStartTime;
+                    const progress = Math.min((elapsedTime / recordingDuration) * 100, 100);
+                    const percentage = Math.round(progress);
+                    
+                    // Actualizar con el número real de chunks
+                    chunkProgress.textContent = `Chunks: ${chunks.length} / ~${estimatedChunks} (${percentage}%)`;
+                    
+                    // Actualizar barra de progreso durante la grabación
+                    const recordingProgress = 70 + (percentage * 0.2); // 70% a 90%
+                    progressFill.style.width = `${recordingProgress}%`;
+                }, 3000);
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                        console.log('Chunk recibido:', e.data.size, 'bytes', 'Total chunks:', chunks.length);
+                    }
+                };
+                
+                mediaRecorder.onstart = () => {
+                    console.log('MediaRecorder iniciado correctamente');
+                    // Forzar solicitud de datos cada segundo
+                    requestDataInterval = setInterval(() => {
+                        if (mediaRecorder.state === 'recording') {
+                            mediaRecorder.requestData();
+                        }
+                    }, 1000);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    clearInterval(chunkUpdateInterval);
+                    clearInterval(requestDataInterval);
+                    chunkProgress.textContent = `Chunks: ${chunks.length} / ${chunks.length} (100%)`;
+                    
+                    console.log('Grabación detenida. Total chunks:', chunks.length);
+                    console.log('Tamaño total:', chunks.reduce((sum, c) => sum + c.size, 0), 'bytes');
+                    
+                    if (chunks.length === 0) {
+                        throw new Error('No se grabó ningún dato. Intenta con archivos de audio más cortos o en formato MP3/WAV.');
+                    }
+                    
+                    setStep(4, 'completed');
+                    
+                    // Paso 5: Finalizando
+                    setStep(5, 'active');
+                    progressText.textContent = 'Finalizando...';
+                    chunkProgress.textContent = '';
+                    progressFill.style.width = '90%';
+                    
+                    videoBlob = new Blob(chunks, { type: selectedType });
+                    console.log('Video blob creado:', videoBlob.size, 'bytes', 'Formato:', fileExtension);
+                    
+                    const videoUrl = URL.createObjectURL(videoBlob);
+                    resultVideo.src = videoUrl;
+                    
+                    // Guardar extensión para la descarga
+                    resultVideo.dataset.extension = fileExtension;
+                    
+                    setStep(5, 'completed');
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '¡Video creado con éxito!';
+                    
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        videoResult.style.display = 'block';
+                        createButton.disabled = false;
+                    }, 1500);
+
+                    audioContext.close();
+                };
+
+                mediaRecorder.onerror = (e) => {
+                    clearInterval(chunkUpdateInterval);
+                    clearInterval(requestDataInterval);
+                    console.error('Error en MediaRecorder:', e);
+                    throw new Error('Error durante la grabación');
+                };
+
+                // Iniciar grabación - sin especificar timeslice para compatibilidad
+                console.log('Iniciando grabación...');
+                console.log('Estado del stream - Video tracks:', combinedStream.getVideoTracks().length, 'Audio tracks:', combinedStream.getAudioTracks().length);
+                console.log('Audio track enabled:', audioTrack.enabled, 'readyState:', audioTrack.readyState);
+                
+                chunkProgress.textContent = 'Chunks: 0 / ~' + estimatedChunks + ' (0%)';
+                
+                try {
+                    mediaRecorder.start();
+                    // Iniciar la reproducción del audio
+                    audioStreamSource.start(0);
+                    console.log('Grabación y audio iniciados exitosamente');
+                } catch (startError) {
+                    console.error('Error al iniciar grabación:', startError);
+                    throw new Error('No se pudo iniciar la grabación: ' + startError.message);
+                }
+                
+                console.log('Grabación programada por:', recordingDuration, 'ms');
+                
+                setTimeout(() => {
+                    console.log('Deteniendo grabación...');
+                    try {
+                        if (mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                        }
+                        audioStreamSource.stop();
+                        audioStreamContext.close();
+                    } catch (stopError) {
+                        console.error('Error al detener:', stopError);
+                    }
+                }, recordingDuration);
+
+            } catch (error) {
+                console.error('Error detallado:', error);
+                progressText.textContent = `Error: ${error.message}`;
+                chunkProgress.textContent = '';
+                progressFill.style.width = '0%';
+                
+                const activeStep = document.querySelector('.step-item.active');
+                if (activeStep) {
+                    activeStep.style.color = '#f5576c';
+                }
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    createButton.disabled = false;
+                }, 4000);
+            }
+        }
+
+        function setStep(stepNumber, status) {
+            const step = document.getElementById(`step${stepNumber}`);
+            step.classList.remove('active', 'completed');
+            if (status) {
+                step.classList.add(status);
+            }
+        }
+
+        function loadImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function loadAudioBuffer(file, audioContext) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        console.log(`Audio cargado: ${audioBuffer.duration}s, ${audioBuffer.numberOfChannels} canales`);
+                        resolve(audioBuffer);
+                    } catch (error) {
+                        console.error('Error decodificando audio:', error);
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function downloadVideo() {
+            if (videoBlob) {
+                const url = URL.createObjectURL(videoBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Obtener nombre personalizado o usar por defecto
+                let filename = filenameInput.value.trim();
+                if (!filename) {
+                    filename = 'video_' + Date.now();
+                }
+                
+                // Limpiar nombre de archivo (eliminar caracteres no válidos)
+                filename = filename.replace(/[^a-z0-9_-]/gi, '_');
+                
+                // Obtener extensión del video creado
+                const extension = resultVideo.dataset.extension || 'webm';
+                
+                a.download = `${filename}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+        
+        // Función para crear slideshow
+        async function createSlideshow() {
+            createSlideshowButton.disabled = true;
+            
+            // Cambiar a la pestaña principal para mostrar el progreso
+            tabs.forEach(t => t.classList.remove('active'));
+            tabs[0].classList.add('active');
+            tabContents.forEach(content => content.classList.remove('active'));
+            document.getElementById('tab-single').classList.add('active');
+            
+            // Scroll suave al contenedor de progreso
+            setTimeout(() => {
+                progressContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+            
+            progressContainer.style.display = 'block';
+            videoResult.style.display = 'none';
+            
+            // Resetear todos los pasos
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active', 'completed');
+            }
+            
+            try {
+                // Paso 1: Cargar imágenes
+                setStep(1, 'active');
+                progressText.textContent = 'Cargando imágenes...';
+                progressFill.style.width = '15%';
+                
+                const loadedImages = await Promise.all(
+                    slideshowImages.map(file => loadImage(file))
+                );
+                
+                setStep(1, 'completed');
+                
+                // Paso 2: Procesando audio
+                setStep(2, 'active');
+                progressText.textContent = 'Procesando música...';
+                progressFill.style.width = '30%';
+                
+                const audioContext = new AudioContext({ 
+                    sampleRate: 48000,
+                    latencyHint: 'playback'
+                });
+                
+                const musicBuffer = await loadAudioBuffer(musicFile, audioContext);
+                const musicDuration = musicBuffer.duration;
+                
+                console.log(`Duración de la música: ${musicDuration}s`);
+                
+                // Calcular duración final del video y si tiene límite personalizado
+                const MAX_DURATION = 20 * 60;
+                let finalDuration;
+                let hasCustomLimit = false;
+                
+                if (maxVideoDurationInput.value) {
+                    const userMaxDuration = parseFloat(maxVideoDurationInput.value);
+                    finalDuration = Math.min(userMaxDuration, musicDuration, MAX_DURATION);
+                    hasCustomLimit = userMaxDuration < musicDuration;
+                } else {
+                    finalDuration = Math.min(musicDuration, MAX_DURATION);
+                }
+                
+                // Fade out de 3 segundos si se trunca, sino usar el valor configurado por el usuario
+                const finalFadeOutSeconds = hasCustomLimit ? 3 : (parseFloat(fadeOutDurationInput.value) || 2);
+                
+                setStep(2, 'completed');
+                
+                // Crear buffer de audio con fade out si es necesario
+                let finalAudioBuffer;
+                if (hasCustomLimit && finalDuration < musicDuration) {
+                    // Crear nuevo buffer con fade out
+                    const sampleRate = audioContext.sampleRate;
+                    const fadeOutSamples = sampleRate * finalFadeOutSeconds;
+                    const totalSamples = Math.ceil(sampleRate * finalDuration);
+                    
+                    finalAudioBuffer = audioContext.createBuffer(
+                        musicBuffer.numberOfChannels,
+                        totalSamples,
+                        sampleRate
+                    );
+                    
+                    // Copiar y aplicar fade out
+                    for (let channel = 0; channel < musicBuffer.numberOfChannels; channel++) {
+                        const outputData = finalAudioBuffer.getChannelData(channel);
+                        const sourceData = musicBuffer.getChannelData(channel);
+                        
+                        for (let i = 0; i < totalSamples; i++) {
+                            let sample = sourceData[i];
+                            
+                            // Aplicar fade out en los últimos segundos
+                            if (i >= totalSamples - fadeOutSamples) {
+                                const fadeProgress = (totalSamples - i) / fadeOutSamples;
+                                sample *= fadeProgress;
+                            }
+                            
+                            outputData[i] = sample;
+                        }
+                    }
+                    
+                    console.log('Audio recortado con fade out aplicado');
+                } else {
+                    finalAudioBuffer = musicBuffer;
+                }
+                
+                // Paso 3: Calculando tiempos
+                setStep(3, 'active');
+                progressText.textContent = 'Calculando transiciones...';
+                progressFill.style.width = '50%';
+                
+                // Obtener configuraciones del usuario
+                const fadeInSeconds = parseFloat(fadeInDurationInput.value) || 0.5;
+                const fadeOutSecondsPerImage = parseFloat(fadeOutDurationInput.value) || 2;
+                const imageDuration = parseFloat(slideDurationInput.value) || 4;
+                
+                console.log(`Fade In: ${fadeInSeconds}s, Fade Out: ${finalFadeOutSeconds}s, Duración imagen: ${imageDuration}s, Duración final: ${finalDuration}s`);
+                
+                // Generar efectos aleatorios para cada imagen
+                const imageEffects = loadedImages.map(() => {
+                    const effects = ['zoom-in', 'zoom-out', 'pan-left', 'pan-right', 'pan-up', 'pan-down', 'zoom-pan'];
+                    return effects[Math.floor(Math.random() * effects.length)];
+                });
+                
+                console.log('Efectos generados:', imageEffects);
+                
+                // Mostrar información de duración
+                durationInfo.style.display = 'block';
+                const minutes = Math.floor(finalDuration / 60);
+                const seconds = Math.floor(finalDuration % 60);
+                durationInfo.innerHTML = `⏱️ Duración del video: ${minutes}:${seconds.toString().padStart(2, '0')} | ${loadedImages.length} imágenes | ${imageDuration}s por imagen`;
+                
+                if (hasCustomLimit) {
+                    durationInfo.innerHTML += `<div class="duration-warning">⚠️ Video limitado a ${Math.floor(finalDuration / 60)}:${(finalDuration % 60).toString().padStart(2, '0')} con fade out de 3 segundos</div>`;
+                } else if (musicDuration > MAX_DURATION) {
+                    const origMinutes = Math.floor(musicDuration / 60);
+                    const origSeconds = Math.floor(musicDuration % 60);
+                    durationInfo.innerHTML += `<div class="duration-warning">⚠️ Música original: ${origMinutes}:${origSeconds.toString().padStart(2, '0')} - Límite 20 min</div>`;
+                }
+                
+                setStep(3, 'completed');
+                
+                // Paso 4: Creando animación
+                setStep(4, 'active');
+                progressText.textContent = 'Creando slideshow...';
+                chunkProgress.textContent = 'Renderizando: 0%';
+                progressFill.style.width = '70%';
+                
+                // Obtener configuración de texto
+                const overlayText = overlayTextInput.value.trim();
+                const textSize = parseInt(textSizeInput.value) || 60;
+                const textFont = textFontInput.value || 'Comic Sans MS';
+                const textColor = textColorInput.value || '#ffffff';
+                const textPadding = parseInt(textPaddingInput.value) || 50;
+                const textStrokeWidth = parseFloat(textStrokeWidthInput.value) || 1;
+                const textStrokeColor = textStrokeColorInput.value || '#ffffff';
+                const textBold = textBoldCheckbox.checked;
+                const textItalic = textItalicCheckbox.checked;
+                
+                // Construir string de fuente con estilos
+                let fontString = '';
+                if (textItalic) fontString += 'italic ';
+                if (textBold) fontString += 'bold ';
+                fontString += `${textSize}px ${textFont}`;
+                
+                console.log('Configuración de texto:', { overlayText, fontString, textColor, textPadding, textStrokeWidth, textStrokeColor });
+                
+                // Crear canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = 1280;
+                canvas.height = 720;
+                const ctx = canvas.getContext('2d');
+                
+                let animationStartTime = null;
+                let currentImageIndex = 0;
+                
+                function applyEffect(ctx, img, effect, progress, drawX, drawY, drawWidth, drawHeight) {
+                    ctx.save();
+                    
+                    // Calcular transformaciones basadas en el efecto
+                    let scale = 1;
+                    let offsetX = 0;
+                    let offsetY = 0;
+                    
+                    switch(effect) {
+                        case 'zoom-in':
+                            scale = 1 + (progress * 0.2); // Zoom del 100% al 120%
+                            break;
+                        case 'zoom-out':
+                            scale = 1.2 - (progress * 0.2); // Zoom del 120% al 100%
+                            break;
+                        case 'pan-left':
+                            offsetX = -drawWidth * 0.1 * progress; // Pan 10% a la izquierda
+                            break;
+                        case 'pan-right':
+                            offsetX = drawWidth * 0.1 * progress; // Pan 10% a la derecha
+                            break;
+                        case 'pan-up':
+                            offsetY = -drawHeight * 0.1 * progress; // Pan 10% arriba
+                            break;
+                        case 'pan-down':
+                            offsetY = drawHeight * 0.1 * progress; // Pan 10% abajo
+                            break;
+                        case 'zoom-pan':
+                            scale = 1 + (progress * 0.15);
+                            offsetX = drawWidth * 0.05 * progress;
+                            offsetY = -drawHeight * 0.05 * progress;
+                            break;
+                    }
+                    
+                    // Aplicar transformaciones
+                    const scaledWidth = drawWidth * scale;
+                    const scaledHeight = drawHeight * scale;
+                    const finalX = drawX - (scaledWidth - drawWidth) / 2 + offsetX;
+                    const finalY = drawY - (scaledHeight - drawHeight) / 2 + offsetY;
+                    
+                    ctx.drawImage(img, finalX, finalY, scaledWidth, scaledHeight);
+                    ctx.restore();
+                }
+                
+                function animateSlideshow(timestamp) {
+                    if (!animationStartTime) animationStartTime = timestamp;
+                    const elapsed = (timestamp - animationStartTime) / 1000; // en segundos
+                    
+                    if (elapsed >= finalDuration) return;
+                    
+                    // Actualizar progreso de renderizado cada frame
+                    const renderProgress = Math.min((elapsed / finalDuration) * 100, 100);
+                    chunkProgress.textContent = `Renderizando: ${Math.round(renderProgress)}%`;
+                    
+                    // Calcular qué imagen mostrar (bucle infinito)
+                    const totalCycles = Math.floor(elapsed / imageDuration);
+                    const newImageIndex = totalCycles % loadedImages.length;
+                    
+                    // Log cuando cambia la imagen
+                    if (newImageIndex !== currentImageIndex) {
+                        console.log(`Cambiando a imagen ${newImageIndex} (tiempo: ${elapsed.toFixed(1)}s)`);
+                        currentImageIndex = newImageIndex;
+                    }
+                    
+                    const timeInCurrentImage = elapsed % imageDuration;
+                    const imageProgress = timeInCurrentImage / imageDuration; // 0 a 1
+                    
+                    // Calcular opacidad con fade in/out
+                    let opacity = 1;
+                    
+                    // Fade in al inicio de cada imagen
+                    if (timeInCurrentImage < fadeInSeconds) {
+                        opacity = timeInCurrentImage / fadeInSeconds;
+                    } 
+                    // Fade out al final de cada imagen
+                    else if (timeInCurrentImage > imageDuration - fadeOutSecondsPerImage) {
+                        opacity = (imageDuration - timeInCurrentImage) / fadeOutSecondsPerImage;
+                    }
+                    
+                    // Fade out final si se alcanza el límite de duración
+                    if (hasCustomLimit && elapsed >= finalDuration - finalFadeOutSeconds) {
+                        const finalFadeProgress = (finalDuration - elapsed) / finalFadeOutSeconds;
+                        opacity *= finalFadeProgress;
+                    }
+                    
+                    // Dibujar fondo negro
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Dibujar imagen con efecto y fade
+                    ctx.save();
+                    ctx.globalAlpha = opacity;
+                    
+                    const img = loadedImages[currentImageIndex];
+                    const imgRatio = img.width / img.height;
+                    const canvasRatio = canvas.width / canvas.height;
+                    
+                    let drawWidth, drawHeight, drawX, drawY;
+                    
+                    if (imgRatio > canvasRatio) {
+                        drawWidth = canvas.width;
+                        drawHeight = canvas.width / imgRatio;
+                        drawX = 0;
+                        drawY = (canvas.height - drawHeight) / 2;
+                    } else {
+                        drawHeight = canvas.height;
+                        drawWidth = canvas.height * imgRatio;
+                        drawX = (canvas.width - drawWidth) / 2;
+                        drawY = 0;
+                    }
+                    
+                    // Aplicar efecto dinámico
+                    const effect = imageEffects[currentImageIndex];
+                    applyEffect(ctx, img, effect, imageProgress, drawX, drawY, drawWidth, drawHeight);
+                    
+                    ctx.restore();
+                    
+                    // Dibujar texto superpuesto si existe
+                    if (overlayText) {
+                        ctx.save();
+                        ctx.globalAlpha = opacity; // Usar la misma opacidad que la imagen
+                        ctx.font = fontString;
+                        ctx.textAlign = 'right';
+                        ctx.textBaseline = 'bottom';
+                        
+                        // Añadir sombra para mejor legibilidad
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
+                        
+                        const textX = canvas.width - textPadding;
+                        const textY = canvas.height - textPadding;
+                        
+                        // Dibujar borde del texto si el ancho es mayor que 0
+                        if (textStrokeWidth > 0) {
+                            ctx.strokeStyle = textStrokeColor;
+                            ctx.lineWidth = textStrokeWidth;
+                            ctx.lineJoin = 'round'; // Bordes redondeados
+                            ctx.miterLimit = 2;
+                            ctx.strokeText(overlayText, textX, textY);
+                        }
+                        
+                        // Dibujar texto relleno
+                        ctx.fillStyle = textColor;
+                        ctx.fillText(overlayText, textX, textY);
+                        
+                        ctx.restore();
+                    }
+                    
+                    requestAnimationFrame(animateSlideshow);
+                }
+                
+                requestAnimationFrame(animateSlideshow);
+                
+                // Crear streams
+                const canvasStream = canvas.captureStream(25);
+                
+                const audioStreamContext = new AudioContext({ 
+                    sampleRate: 48000,
+                    latencyHint: 'playback'
+                });
+                const audioStreamSource = audioStreamContext.createBufferSource();
+                audioStreamSource.buffer = finalAudioBuffer; // Usar el buffer procesado
+                
+                const audioStreamDestination = audioStreamContext.createMediaStreamDestination();
+                audioStreamSource.connect(audioStreamDestination);
+                
+                const videoTrack = canvasStream.getVideoTracks()[0];
+                const audioTrack = audioStreamDestination.stream.getAudioTracks()[0];
+                const combinedStream = new MediaStream([videoTrack, audioTrack]);
+                
+                // Obtener formato seleccionado
+                const selectedFormat = document.querySelector('input[name="formatSlideshow"]:checked').value;
+                
+                let possibleTypes = [];
+                let fileExtension = '';
+                
+                if (selectedFormat === 'mp4') {
+                    possibleTypes = [
+                        'video/mp4;codecs=avc1,mp4a.40.2',
+                        'video/mp4;codecs=h264,aac',
+                        'video/mp4'
+                    ];
+                    fileExtension = 'mp4';
+                } else {
+                    possibleTypes = [
+                        'video/webm;codecs=vp9,opus',
+                        'video/webm;codecs=vp8,opus',
+                        'video/webm;codecs=h264,opus',
+                        'video/webm'
+                    ];
+                    fileExtension = 'webm';
+                }
+                
+                let selectedType = possibleTypes[possibleTypes.length - 1];
+                for (const type of possibleTypes) {
+                    if (MediaRecorder.isTypeSupported(type)) {
+                        selectedType = type;
+                        break;
+                    }
+                }
+                
+                if (selectedFormat === 'mp4' && !selectedType.includes('mp4')) {
+                    selectedType = 'video/webm;codecs=vp8,opus';
+                    fileExtension = 'webm';
+                    alert('Tu navegador no soporta grabación en MP4. Se usará formato WebM.');
+                }
+                
+                const mediaRecorder = new MediaRecorder(combinedStream, {
+                    mimeType: selectedType,
+                    videoBitsPerSecond: 5000000,
+                    audioBitsPerSecond: 320000
+                });
+                
+                const chunks = [];
+                const recordingDuration = (finalDuration + 1) * 1000;
+                let recordingStartTime = Date.now();
+                const estimatedChunks = Math.ceil(recordingDuration / 1000);
+                let chunkUpdateInterval;
+                
+                // Actualizar progreso de chunks cada 3 segundos
+                chunkUpdateInterval = setInterval(() => {
+                    const elapsedTime = Date.now() - recordingStartTime;
+                    const progress = Math.min((elapsedTime / recordingDuration) * 100, 100);
+                    const percentage = Math.round(progress);
+                    
+                    chunkProgress.textContent = `Grabando: ${chunks.length} chunks / ~${estimatedChunks} (${percentage}%)`;
+                    
+                    // Actualizar barra de progreso
+                    const recordingProgress = 70 + (percentage * 0.2); // 70% a 90%
+                    progressFill.style.width = `${recordingProgress}%`;
+                }, 3000);
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                        console.log('Chunk recibido:', e.data.size, 'bytes', 'Total:', chunks.length);
+                    }
+                };
+                
+                mediaRecorder.onstart = () => {
+                    console.log('Grabación de slideshow iniciada');
+                    setInterval(() => {
+                        if (mediaRecorder.state === 'recording') {
+                            mediaRecorder.requestData();
+                        }
+                    }, 1000);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    clearInterval(chunkUpdateInterval);
+                    setStep(4, 'completed');
+                    setStep(5, 'active');
+                    progressText.textContent = 'Finalizando...';
+                    chunkProgress.textContent = `Chunks: ${chunks.length} / ${chunks.length} (100%)`;
+                    progressFill.style.width = '90%';
+                    
+                    videoBlob = new Blob(chunks, { type: selectedType });
+                    const videoUrl = URL.createObjectURL(videoBlob);
+                    resultVideo.src = videoUrl;
+                    resultVideo.dataset.extension = fileExtension;
+                    
+                    setStep(5, 'completed');
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '¡Slideshow creado con éxito!';
+                    
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        videoResult.style.display = 'block';
+                        createSlideshowButton.disabled = false;
+                        chunkProgress.textContent = '';
+                    }, 1500);
+                    
+                    audioContext.close();
+                };
+                
+                mediaRecorder.onerror = (e) => {
+                    clearInterval(chunkUpdateInterval);
+                    console.error('Error en MediaRecorder:', e);
+                    throw new Error('Error durante la grabación');
+                };
+                
+                mediaRecorder.start();
+                audioStreamSource.start(0);
+                
+                setTimeout(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                    audioStreamSource.stop();
+                    audioStreamContext.close();
+                }, recordingDuration);
+                
+            } catch (error) {
+                console.error('Error en slideshow:', error);
+                progressText.textContent = `Error: ${error.message}`;
+                chunkProgress.textContent = '';
+                progressFill.style.width = '0%';
+                durationInfo.style.display = 'none';
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    createSlideshowButton.disabled = false;
+                }, 4000);
+            }
+        }
+    </script>
+    
+    <!-- PWA Service Worker y funcionalidad de instalación -->
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                        
+                        // Verificar actualizaciones
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nueva versión disponible
+                                    if (confirm('¡Nueva versión disponible! ¿Actualizar ahora?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.log('❌ Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Manejo de instalación de PWA
+        let deferredPrompt;
+        const installContainer = document.createElement('div');
+        installContainer.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 10000;
+            max-width: 300px;
+        `;
+        
+        installContainer.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">📱 Instalar App</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Úsala sin conexión</div>
+                </div>
+                <button id="installBtn" style="
+                    background: white;
+                    color: #667eea;
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 14px;
+                ">Instalar</button>
+                <button id="closeInstallBtn" style="
+                    background: transparent;
+                    color: white;
+                    border: none;
+                    padding: 5px;
+                    cursor: pointer;
+                    font-size: 20px;
+                    line-height: 1;
+                ">×</button>
+            </div>
+        `;
+        
+        document.body.appendChild(installContainer);
+
+        // Capturar evento beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installContainer.style.display = 'block';
+            
+            console.log('💡 PWA instalable - Mostrando banner');
+        });
+
+        // Botón de instalar
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'installBtn') {
+                installContainer.style.display = 'none';
+                
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('✅ Usuario aceptó instalar PWA');
+                        } else {
+                            console.log('❌ Usuario rechazó instalar PWA');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            }
+            
+            if (e.target.id === 'closeInstallBtn') {
+                installContainer.style.display = 'none';
+            }
+        });
+
+        // Detectar si ya está instalada
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA instalada exitosamente');
+            installContainer.style.display = 'none';
+        });
+
+        // Detectar si se está ejecutando como PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            console.log('📱 Ejecutando como PWA instalada');
+        }
+    </script>
+</body>
+</html>
