@@ -1,24 +1,31 @@
-# Node modules (si usas herramientas de build)
-node_modules/
+```
+# Compressed archives
+*.zip
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dependencies
+venv/
+.venv/
+.env
+.env.local
+*.env.*
 
 # Logs
 *.log
-npm-debug.log*
 
-# Sistema operativo
-.DS_Store
-Thumbs.db
-
-# Editores
+# Editor/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-
-# Archivos temporales
 *.tmp
-.cache/
 
-# Backups
-*.bak
+# Build/dist folders
+dist/
+build/
+```
